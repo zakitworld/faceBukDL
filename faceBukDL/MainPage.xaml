@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="faceBukDL.MainPage"
+             BackgroundColor="#F5F6F8"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*" Padding="24,22,24,18">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+            <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                <Label Text="CLIP / SAVE" FontSize="11" CharacterSpacing="2.2"
+                       FontAttributes="Bold" TextColor="#557165" />
+                <Label Text="Video saver" FontSize="26" FontAttributes="Bold"
+                       TextColor="#16231D" />
+            </VerticalStackLayout>
+            <Border Grid.Column="1" WidthRequest="48" HeightRequest="48"
+                    StrokeThickness="0" BackgroundColor="#DCECE3"
+                    StrokeShape="RoundRectangle 16" VerticalOptions="Center">
+                <Label Text="↓" FontSize="28" FontAttributes="Bold" TextColor="#256546"
+                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="18">
+                <Border Padding="22" BackgroundColor="#173D2C" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 28">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="13">
+                        <Border Padding="10,5" HorizontalOptions="Start"
+                                BackgroundColor="#2B6046" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 20">
+                            <Label Text="FACEBOOK VIDEO" FontSize="10" CharacterSpacing="1.4"
+                                   FontAttributes="Bold" TextColor="#DAF1E2" />
+                        </Border>
+                        <Label Grid.Row="1" Text="Save a video\nworth keeping."
+                               FontSize="30" LineHeight="1.05" FontAttributes="Bold"
+                               TextColor="White" />
+                        <Label Grid.Row="2" Text="Copy a Facebook video link. We’ll pick it up when you return here."
+                               FontSize="14" LineHeight="1.25" TextColor="#D2E4D9" />
+                        <Button Grid.Row="3" Text="Check copied link   →"
+                                Command="{Binding CheckClipboardCommand}"
+                                BackgroundColor="#D6F36A" TextColor="#183522"
+                                FontSize="15" FontAttributes="Bold" CornerRadius="16"
+                                HeightRequest="54" />
+                    </Grid>
+                </Border>
+
+                <Border Padding="20" BackgroundColor="White" Stroke="#E7EBE8"
+                        StrokeThickness="1" StrokeShape="RoundRectangle 22">
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="DOWNLOAD STATUS" FontSize="10" CharacterSpacing="1.5"
+                                       FontAttributes="Bold" TextColor="#79847D" />
+                                <Label Text="{Binding Status}" FontSize="15" LineBreakMode="WordWrap"
+                                       TextColor="#1C2921" />
+                            </VerticalStackLayout>
+                            <ActivityIndicator Grid.Column="1" IsRunning="{Binding IsBusy}"
+                                               IsVisible="{Binding IsBusy}" Color="#367451"
+                                               VerticalOptions="Center" />
+                        </Grid>
+                        <ProgressBar Progress="{Binding Progress}" ProgressColor="#4B946A"
+                                     BackgroundColor="#E8EEE9" HeightRequest="5" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Progress, StringFormat='{0:P0}'}"
+                                   FontSize="12" TextColor="#69766D" />
+                            <Button Grid.Column="1" Text="Cancel" Command="{Binding CancelCommand}"
+                                    IsEnabled="{Binding IsBusy}" Padding="15,7"
+                                    BackgroundColor="#F0F3F0" TextColor="#334239"
+                                    FontSize="12" CornerRadius="12" HeightRequest="36" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Button Text="Share or export saved video"
+                        Command="{Binding ExportCommand}" IsEnabled="{Binding CanExport}"
+                        BackgroundColor="#FFFFFF" TextColor="#24563C"
+                        BorderColor="#DCE5DE" BorderWidth="1" FontSize="14"
+                        FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
+
+                <Border Padding="16" BackgroundColor="#EAF0EC" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18">
+                    <Grid ColumnDefinitions="26,*" ColumnSpacing="10">
+                        <Label Text="i" FontSize="16" FontAttributes="Bold"
+                               TextColor="#4A6B57" VerticalOptions="Start" />
+                        <Label Grid.Column="1"
+                               Text="Links must be accessible and supported by an authorized video source. iPhone may ask before allowing clipboard access."
+                               FontSize="12" LineHeight="1.2" TextColor="#526158" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
