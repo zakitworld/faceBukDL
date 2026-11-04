@@ -21,6 +21,7 @@ public static class MauiProgram
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddSingleton<IClipboardService, MauiClipboardService>();
         builder.Services.AddSingleton<IVideoExportService, VideoExportService>();
+        builder.Services.AddSingleton<IVideoLibraryService, JsonVideoLibraryService>();
         builder.Services.AddSingleton<IVideoUrlResolver, DirectVideoUrlResolver>();
         builder.Services.AddSingleton<IVideoDownloadService>(services =>
             new VideoDownloadService(new HttpClient { Timeout = TimeSpan.FromMinutes(5) },

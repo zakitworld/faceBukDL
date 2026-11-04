@@ -1,41 +1,44 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:faceBukDL.ViewModels"
+             xmlns:services="clr-namespace:faceBukDL.Services"
              x:Class="faceBukDL.MainPage"
+             x:DataType="vm:MainViewModel"
              BackgroundColor="#F5F6F8"
              Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="Auto,*" Padding="24,22,24,18">
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
             <VerticalStackLayout Spacing="3" VerticalOptions="Center">
                 <Label Text="CLIP / SAVE" FontSize="11" CharacterSpacing="2.2"
-                       FontAttributes="Bold" TextColor="#557165" />
+                       FontAttributes="Bold" TextColor="#58728A" />
                 <Label Text="Video saver" FontSize="26" FontAttributes="Bold"
-                       TextColor="#16231D" />
+                       TextColor="#172533" />
             </VerticalStackLayout>
             <Border Grid.Column="1" WidthRequest="48" HeightRequest="48"
-                    StrokeThickness="0" BackgroundColor="#DCECE3"
+                    StrokeThickness="0" BackgroundColor="#DCEBFA"
                     StrokeShape="RoundRectangle 16" VerticalOptions="Center">
-                <Label Text="↓" FontSize="28" FontAttributes="Bold" TextColor="#256546"
+                <Label Text="↓" FontSize="28" FontAttributes="Bold" TextColor="#286AA6"
                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
             </Border>
         </Grid>
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="18">
-                <Border Padding="22" BackgroundColor="#173D2C" StrokeThickness="0"
+                <Border Padding="22" BackgroundColor="#173B5A" StrokeThickness="0"
                         StrokeShape="RoundRectangle 28">
                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="13">
                         <Border Padding="10,5" HorizontalOptions="Start"
-                                BackgroundColor="#2B6046" StrokeThickness="0"
+                                BackgroundColor="#28577B" StrokeThickness="0"
                                 StrokeShape="RoundRectangle 20">
                             <Label Text="FACEBOOK VIDEO" FontSize="10" CharacterSpacing="1.4"
-                                   FontAttributes="Bold" TextColor="#DAF1E2" />
+                                   FontAttributes="Bold" TextColor="#DCEEFF" />
                         </Border>
-                        <Label Grid.Row="1" Text="Save a video\nworth keeping."
+                        <Label Grid.Row="1" Text="Save a video&#10;worth keeping."
                                FontSize="30" LineHeight="1.05" FontAttributes="Bold"
                                TextColor="White" />
                         <Label Grid.Row="2" Text="Copy a Facebook video link. We’ll pick it up when you return here."
-                               FontSize="14" LineHeight="1.25" TextColor="#D2E4D9" />
+                               FontSize="14" LineHeight="1.25" TextColor="#D3E5F4" />
                     </Grid>
                 </Border>
 
@@ -47,12 +50,12 @@
                 </Border>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                     <Button Text="Paste link" Command="{Binding PasteCommand}"
-                            BackgroundColor="#FFFFFF" TextColor="#24563C"
+                            BackgroundColor="#FFFFFF" TextColor="#245E91"
                             BorderColor="#DCE5DE" BorderWidth="1" FontSize="14"
                             FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
                     <Button Grid.Column="1" Text="Download video  →" Command="{Binding DownloadCommand}"
                             IsEnabled="{Binding CanDownload}"
-                            BackgroundColor="#D6F36A" TextColor="#183522"
+                            BackgroundColor="#C9E6FF" TextColor="#183B5A"
                             FontSize="14" FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
                 </Grid>
 
@@ -67,10 +70,10 @@
                                        TextColor="#1C2921" />
                             </VerticalStackLayout>
                             <ActivityIndicator Grid.Column="1" IsRunning="{Binding IsBusy}"
-                                               IsVisible="{Binding IsBusy}" Color="#367451"
+                                               IsVisible="{Binding IsBusy}" Color="#367FC0"
                                                VerticalOptions="Center" />
                         </Grid>
-                        <ProgressBar Progress="{Binding Progress}" ProgressColor="#4B946A"
+                        <ProgressBar Progress="{Binding Progress}" ProgressColor="#438ED0"
                                      BackgroundColor="#E8EEE9" HeightRequest="5" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="{Binding Progress, StringFormat='{0:P0}'}"
@@ -85,18 +88,56 @@
 
                 <Button Text="Share or export saved video"
                         Command="{Binding ExportCommand}" IsEnabled="{Binding CanExport}"
-                        BackgroundColor="#FFFFFF" TextColor="#24563C"
+                        BackgroundColor="#FFFFFF" TextColor="#245E91"
                         BorderColor="#DCE5DE" BorderWidth="1" FontSize="14"
                         FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
 
-                <Border Padding="16" BackgroundColor="#EAF0EC" StrokeThickness="0"
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Your downloads" FontSize="20" FontAttributes="Bold"
+                               TextColor="#172533" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="Saved on this device" FontSize="11"
+                               TextColor="#69766D" VerticalOptions="Center" />
+                    </Grid>
+                    <CollectionView ItemsSource="{Binding Downloads}" EmptyView="No videos saved yet."
+                                    SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="services:VideoDownloadRecord">
+                                <Border Padding="14" Margin="0,0,0,8" BackgroundColor="White"
+                                        Stroke="#E7EBE8" StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 16">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                        <Label Text="{Binding FileName}" FontSize="14"
+                                               FontAttributes="Bold" TextColor="#1C2921"
+                                               LineBreakMode="TailTruncation" />
+                                        <Label Grid.Row="1" Text="{Binding SizeBytes, StringFormat='{0:N0} bytes'}"
+                                               FontSize="11" TextColor="#69766D" />
+                                        <HorizontalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="4">
+                                            <Button Text="Open" Padding="9,5" FontSize="12"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenRecordCommand, x:DataType={x:Null}}"
+                                                    CommandParameter="{Binding .}" />
+                                            <Button Text="Share" Padding="9,5" FontSize="12"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShareRecordCommand, x:DataType={x:Null}}"
+                                                    CommandParameter="{Binding .}" />
+                                            <Button Text="Delete" Padding="9,5" FontSize="12"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteRecordCommand, x:DataType={x:Null}}"
+                                                    CommandParameter="{Binding .}" />
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <Border Padding="16" BackgroundColor="#EAF2F8" StrokeThickness="0"
                         StrokeShape="RoundRectangle 18">
                     <Grid ColumnDefinitions="26,*" ColumnSpacing="10">
                         <Label Text="i" FontSize="16" FontAttributes="Bold"
-                               TextColor="#4A6B57" VerticalOptions="Start" />
+                               TextColor="#42698A" VerticalOptions="Start" />
                         <Label Grid.Column="1"
                                Text="Links must be accessible and supported by an authorized video source. iPhone may ask before allowing clipboard access."
-                               FontSize="12" LineHeight="1.2" TextColor="#526158" />
+                               FontSize="12" LineHeight="1.2" TextColor="#526779" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>

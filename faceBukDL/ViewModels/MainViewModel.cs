@@ -1,5 +1,7 @@
 using System.Windows.Input;
 using faceBukDL.Services;
+using System.Collections.ObjectModel;
+using Microsoft.Maui.ApplicationModel;
 
 namespace faceBukDL.ViewModels;
 
@@ -8,9 +10,8 @@ public sealed class MainViewModel : BindableObject
     private readonly IVideoDownloadService _downloads;
     private readonly IClipboardService _clipboard;
     private readonly IVideoExportService _export;
+    private readonly IVideoLibraryService _library;
     private CancellationTokenSource? _downloadCts;
-    private string? _lastCompletedUrl;
-    private string? _savedPath;
     private string _linkText = string.Empty;
     private string _status = "Copy a Facebook video link, then return here.";
     private double _progress;
@@ -39,17 +40,34 @@ public sealed class MainViewModel : BindableObject
     public ICommand DownloadCommand { get; }
     public ICommand CancelCommand { get; }
     public ICommand ExportCommand { get; }
+    public ICommand OpenRecordCommand { get; }
+    public ICommand ShareRecordCommand { get; }
+    public ICommand DeleteRecordCommand { get; }
+    public ObservableCollection<VideoDownloadRecord> Downloads { get; } = [];
+    private string? _savedPath;
 
-    public MainViewModel(IVideoDownloadService downloads, IClipboardService clipboard, IVideoExportService export)
+    public MainViewModel(IVideoDownloadService downloads, IClipboardService clipboard,
+        IVideoExportService export, IVideoLibraryService library)
     {
         _downloads = downloads;
         _clipboard = clipboard;
         _export = export;
+        _library = library;
         CheckClipboardCommand = new Command(async () => await CheckClipboardAsync());
         PasteCommand = new Command(async () => await PasteClipboardAsync());
         DownloadCommand = new Command(async () => await DownloadLinkAsync(), () => CanDownload);
         CancelCommand = new Command(() => _downloadCts?.Cancel(), () => IsBusy);
         ExportCommand = new Command(async () => await ExportAsync(), () => CanExport);
+        OpenRecordCommand = new Command<VideoDownloadRecord>(async record => await OpenRecordAsync(record));
+        ShareRecordCommand = new Command<VideoDownloadRecord>(async record => await ShareRecordAsync(record));
+        DeleteRecordCommand = new Command<VideoDownloadRecord>(async record => await DeleteRecordAsync(record));
+    }
+
+    public async Task InitializeAsync()
+    {
+        Downloads.Clear();
+        foreach (var record in await _library.GetAllAsync())
+            if (File.Exists(record.FilePath)) Downloads.Add(record);
     }
 
     public async Task CheckClipboardAsync()
@@ -115,9 +133,9 @@ public sealed class MainViewModel : BindableObject
     private async Task DownloadAsync(Uri uri)
     {
         if (IsBusy) return;
-        if (uri.AbsoluteUri == _lastCompletedUrl && CanExport)
+        if (Downloads.Any(x => x.SourceUrl == uri.AbsoluteUri && File.Exists(x.FilePath)))
         {
-            Status = "This video is already saved. Use Share / export below.";
+            Status = "This video is already in your library.";
             return;
         }
 
@@ -129,9 +147,13 @@ public sealed class MainViewModel : BindableObject
         {
             var reporter = new Progress<double>(value => Progress = value);
             var path = await _downloads.DownloadFacebookVideoAsync(uri, reporter, _downloadCts.Token);
-            _lastCompletedUrl = uri.AbsoluteUri;
             _savedPath = path;
-            Status = $"Saved to app storage: {Path.GetFileName(path)}";
+            var info = new FileInfo(path);
+            var record = new VideoDownloadRecord(Guid.NewGuid(), uri.AbsoluteUri, path,
+                Path.GetFileName(path), info.Length, DateTimeOffset.UtcNow);
+            await _library.AddAsync(record, _downloadCts.Token);
+            Downloads.Insert(0, record);
+            Status = $"Saved {record.FileName} ({FormatSize(record.SizeBytes)}).";
             OnPropertyChanged(nameof(CanExport));
         }
         catch (OperationCanceledException) { Status = "Download cancelled. Tap Download to retry."; }
@@ -151,4 +173,35 @@ public sealed class MainViewModel : BindableObject
         try { await _export.ShareAsync(_savedPath); }
         catch (Exception ex) { Status = $"Could not share video: {ex.Message}"; }
     }
+
+    private async Task OpenRecordAsync(VideoDownloadRecord? record)
+    {
+        if (record is null || !File.Exists(record.FilePath)) { Status = "That file is no longer available."; return; }
+        try { await Launcher.Default.OpenAsync(new OpenFileRequest(record.FileName, new ReadOnlyFile(record.FilePath))); }
+        catch (Exception ex) { Status = $"Could not open the video: {ex.Message}"; }
+    }
+
+    private async Task ShareRecordAsync(VideoDownloadRecord? record)
+    {
+        if (record is null || !File.Exists(record.FilePath)) { Status = "That file is no longer available."; return; }
+        try { await _export.ShareAsync(record.FilePath); }
+        catch (Exception ex) { Status = $"Could not share the video: {ex.Message}"; }
+    }
+
+    private async Task DeleteRecordAsync(VideoDownloadRecord? record)
+    {
+        if (record is null) return;
+        try
+        {
+            await _library.DeleteAsync(record.Id);
+            Downloads.Remove(record);
+            if (File.Exists(record.FilePath)) File.Delete(record.FilePath);
+            if (_savedPath == record.FilePath) { _savedPath = null; OnPropertyChanged(nameof(CanExport)); }
+            Status = $"Deleted {record.FileName}.";
+        }
+        catch (Exception ex) { Status = $"Could not delete the video: {ex.Message}"; }
+    }
+
+    private static string FormatSize(long size) => size < 1024 * 1024
+        ? $"{size / 1024d:0} KB" : $"{size / (1024d * 1024):0.0} MB";
 }

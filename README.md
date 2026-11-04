@@ -12,6 +12,7 @@ A .NET MAUI app that checks for a copied Facebook video link when opened or resu
 - Streams files to app-private storage with a 500 MB size cap and `.partial` cleanup on failure.
 - Restricts the stream URL to HTTPS and an explicitly configured host allowlist.
 - Lets the user share/export a completed video through the platform share sheet.
+- Persists completed downloads in a local JSON library with open, share, and delete actions.
 - Uses an MVVM-style view model and injectable clipboard, export, resolver, and download services.
 
 ## Requirements
@@ -90,4 +91,5 @@ faceBukDL/
 - The default resolver intentionally cannot turn Facebook page/share links into MP4 stream URLs. Consequently, end-to-end Facebook downloading is not functional until an authorized resolver is supplied.
 - The host allowlist starts empty. Add the trusted hosts returned by the configured resolver before downloads can pass validation.
 - Downloads are foreground `HttpClient` operations. They can be interrupted if the OS suspends or terminates the app; use platform background transfer APIs if background completion is a product requirement.
-- Download history is session-only in the current UI; there is no persistent library or automatic cleanup policy yet.
+- Downloads use a foreground `HttpClient`; interrupted transfers are cleaned up and must be restarted. Native background transfer support is not implemented yet.
+- The library stores metadata in app-private JSON and removes entries when the user deletes a video; there is no automatic age-based cleanup policy yet.
