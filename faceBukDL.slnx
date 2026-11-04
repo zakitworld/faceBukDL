@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="faceBukDL/faceBukDL.csproj" />
+  <Project Path="faceBukDL/faceBukDL.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>

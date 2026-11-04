@@ -24,7 +24,7 @@
             <VerticalStackLayout Spacing="18">
                 <Border Padding="22" BackgroundColor="#173D2C" StrokeThickness="0"
                         StrokeShape="RoundRectangle 28">
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="13">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="13">
                         <Border Padding="10,5" HorizontalOptions="Start"
                                 BackgroundColor="#2B6046" StrokeThickness="0"
                                 StrokeShape="RoundRectangle 20">
@@ -36,13 +36,25 @@
                                TextColor="White" />
                         <Label Grid.Row="2" Text="Copy a Facebook video link. We’ll pick it up when you return here."
                                FontSize="14" LineHeight="1.25" TextColor="#D2E4D9" />
-                        <Button Grid.Row="3" Text="Check copied link   →"
-                                Command="{Binding CheckClipboardCommand}"
-                                BackgroundColor="#D6F36A" TextColor="#183522"
-                                FontSize="15" FontAttributes="Bold" CornerRadius="16"
-                                HeightRequest="54" />
                     </Grid>
                 </Border>
+
+                <Border Padding="16,12" BackgroundColor="White" Stroke="#DCE5DE"
+                        StrokeThickness="1" StrokeShape="RoundRectangle 18">
+                    <Entry Text="{Binding LinkText}" Placeholder="Paste Facebook video link here"
+                           Keyboard="Url" ClearButtonVisibility="WhileEditing"
+                           TextColor="#1C2921" PlaceholderColor="#87938B" />
+                </Border>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Paste link" Command="{Binding PasteCommand}"
+                            BackgroundColor="#FFFFFF" TextColor="#24563C"
+                            BorderColor="#DCE5DE" BorderWidth="1" FontSize="14"
+                            FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
+                    <Button Grid.Column="1" Text="Download video  →" Command="{Binding DownloadCommand}"
+                            IsEnabled="{Binding CanDownload}"
+                            BackgroundColor="#D6F36A" TextColor="#183522"
+                            FontSize="14" FontAttributes="Bold" CornerRadius="16" HeightRequest="52" />
+                </Grid>
 
                 <Border Padding="20" BackgroundColor="White" Stroke="#E7EBE8"
                         StrokeThickness="1" StrokeShape="RoundRectangle 22">
